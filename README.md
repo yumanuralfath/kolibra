@@ -19,40 +19,21 @@ project/
 ├─ Cargo.toml # The Cargo.toml file defines the dependencies and feature flags for your project
 ```
 
-### Automatic Tailwind (Dioxus 0.7+)
+### Styling and Development
 
-As of Dioxus 0.7, there no longer is a need to manually install tailwind. Simply `dx serve` and you're good to go!
-
-Automatic tailwind is supported by checking for a file called `tailwind.css` in your app's manifest directory (next to Cargo.toml). To customize the file, use the dioxus.toml:
-
-```toml
-[application]
-tailwind_input = "my.css"
-tailwind_output = "assets/out.css"
-```
-
-### Tailwind Manual Install
-
-To use tailwind plugins or manually customize tailwind, you can can install the Tailwind CLI and use it directly.
-
-1. Install npm: https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
-2. Install the Tailwind CSS CLI: https://tailwindcss.com/docs/installation/tailwind-cli
-3. Run the following command in the root of the project to start the Tailwind CSS compiler:
+Tailwind CSS v4, DaisyUI, and `tw-animate-css` are managed with Bun. Install the dependencies once:
 
 ```bash
-npx @tailwindcss/cli -i ./input.css -o ./assets/tailwind.css --watch
+bun install
 ```
 
-### Serving Your App
-
-Run the following command in the root of your project to start developing with the default platform:
+Run the CSS watcher and Dioxus development server together in one terminal:
 
 ```bash
-dx serve --platform web
+bun run dev
 ```
 
-To run for a different platform, use the `--platform platform` flag. E.g.
-```bash
-dx serve --platform desktop
-```
+The development command builds the stylesheet once, then watches `assets/tailwind.input.css` and Rust source files for Tailwind classes while `dx serve` runs. CSS changes update the asset without recompiling the Rust app. To run only the Tailwind watcher, use `bun run css:watch`; to build the stylesheet once, use `bun run css:build`.
+
+The generated stylesheet is `assets/tailwind.css`, which is linked by the app. Add DaisyUI components with their standard classes, such as `btn btn-primary`.
 

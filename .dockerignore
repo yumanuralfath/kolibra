@@ -1,5 +1,7 @@
 **/target
 **/dist
+**/node_modules
+**/.git
 LICENSES
 LICENSE
 temp

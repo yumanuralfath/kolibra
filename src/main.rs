@@ -1,8 +1,19 @@
 use dioxus::prelude::*;
+use ui::Home;
 
-mod components;
+mod server;
+mod ui;
 
+const FAVICON: Asset = asset!("../assets/favicon.ico");
 const TAILWIND_CSS: Asset = asset!("/assets/tailwind.css");
+const MAIN_CSS: Asset = asset!("../assets/main.css");
+
+#[derive(Debug, Clone, Routable, PartialEq)]
+#[rustfmt::skip]
+enum Route {
+    #[route("/")]
+    Home{},
+}
 
 fn main() {
     dioxus::launch(App);
@@ -10,30 +21,16 @@ fn main() {
 
 #[component]
 fn App() -> Element {
+    let theme = use_signal(|| false);
+    use_context_provider(|| theme);
+
     rsx! {
+        document::Link {rel: "icon", href: FAVICON}
         document::Link { rel: "stylesheet", href: TAILWIND_CSS }
-        main {
-            h1 { "Login" }
-            form {
-                onsubmit: move |event| event.prevent_default(),
-                label { r#for: "email", "Email" }
-                input {
-                    id: "email",
-                    name: "email",
-                    r#type: "email",
-                    autocomplete: "email",
-                    required: true,
-                }
-                label { r#for: "password", "Password" }
-                input {
-                    id: "password",
-                    name: "password",
-                    r#type: "password",
-                    autocomplete: "current-password",
-                    required: true,
-                }
-                button { r#type: "submit", "Login" }
-            }
+        document::Link {rel: "stylesheet", href: MAIN_CSS}
+        div {
+            "data-theme": if theme() { "dark" } else { "light" },
+            Router<Route> {}
         }
     }
 }
