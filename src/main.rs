@@ -1,6 +1,7 @@
-use dioxus::prelude::*;
+use dioxus::{logger::tracing::Level, prelude::*};
 use ui::Home;
 
+mod core;
 mod server;
 mod ui;
 
@@ -16,6 +17,10 @@ enum Route {
 }
 
 fn main() {
+    #[cfg(feature = "server")]
+    core::load_env();
+
+    dioxus::logger::init(Level::INFO).expect("failed to init logger");
     dioxus::launch(App);
 }
 
