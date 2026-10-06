@@ -1,0 +1,16 @@
+{
+  "dependencies": {},
+  "scripts": {
+    "css:build": "tailwindcss -i ./assets/tailwind.input.css -o ./assets/tailwind.css",
+    "css:watch": "tailwindcss -i ./assets/tailwind.input.css -o ./assets/tailwind.css --watch",
+    "dev": "bun run css:build && bun run scripts/dev.ts"
+  },
+  "devDependencies": {
+    "@iconify-json/lucide": "^1.2.140",
+    "@iconify/tailwind4": "^1.2.3",
+    "@tailwindcss/cli": "^4",
+    "daisyui": "^5",
+    "tailwind-animations": "^1.0.2",
+    "tailwindcss": "^4"
+  }
+}
