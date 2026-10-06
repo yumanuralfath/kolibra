@@ -21,7 +21,7 @@ pub fn navbar_comp() -> Element {
                     *theme.write() = !current_theme;
                 },
                 span {
-                    class: if theme() { "icon-[lucide--sun] size-5" } else { "icon-[lucide--moon] size-5" },
+                    class: if theme() { "hover:animate-jelly icon-[lucide--sun] size-5" } else { "hover:animate-jelly icon-[lucide--moon] size-5" },
                     aria_hidden: "true",
                 }
             }
