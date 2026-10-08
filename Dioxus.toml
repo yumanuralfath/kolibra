@@ -1,4 +1,9 @@
 [application]
+name = "kolibra"
+
+[bundle]
+identifier = "com.yumana.kolibra"
+publisher = "Yumana"
 
 [web.app]
 

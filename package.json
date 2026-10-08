@@ -2,8 +2,7 @@
   "dependencies": {},
   "scripts": {
     "css:build": "tailwindcss -i ./assets/tailwind.input.css -o ./assets/tailwind.css",
-    "css:watch": "tailwindcss -i ./assets/tailwind.input.css -o ./assets/tailwind.css --watch",
-    "dev": "bun run css:build && bun run scripts/dev.ts"
+    "css:watch": "tailwindcss -i ./assets/tailwind.input.css -o ./assets/tailwind.css --watch"
   },
   "devDependencies": {
     "@iconify-json/lucide": "^1.2.140",
