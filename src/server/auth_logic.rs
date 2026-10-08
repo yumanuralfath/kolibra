@@ -1,7 +1,6 @@
 use argon2::{password_hash::PasswordHash, Argon2, PasswordVerifier};
 use hmac::{Hmac, Mac};
 use sha2::Sha256;
-
 type HmacSha256 = Hmac<Sha256>;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -37,7 +36,6 @@ pub fn session_token_is_valid(token: &str, secret: &str, now: u64) -> bool {
     if expiry <= now {
         return false;
     }
-
     let Ok(signature) = hex::decode(signature) else {
         return false;
     };
@@ -55,6 +53,5 @@ pub fn session_cookie_is_valid(cookie_header: &str, secret: &str, now: u64) -> b
     }) else {
         return false;
     };
-
     session_token_is_valid(token, secret, now)
 }

@@ -13,7 +13,6 @@ async fn health_check() -> Result<Json<CheckHelth>> {
     let utc_now = Utc::now();
     let wib_offset = FixedOffset::east_opt(7 * 3600).unwrap();
     let wib_now = utc_now.with_timezone(&wib_offset);
-
     Ok(Json(CheckHelth {
         success: true,
         date: wib_now,

@@ -1,5 +1,21 @@
+use dioxus::fullstack::set_server_url;
+use dioxus::logger::tracing::Level;
+use dioxus::{logger, prelude::*};
+
+pub fn init(app: fn() -> Element) {
+    #[cfg(not(feature = "server"))]
+    set_server_url("https://kolibra-production.up.railway.app");
+
+    #[cfg(feature = "server")]
+    load_env();
+
+    logger::init(Level::INFO).expect("failed to init logger");
+    info!("App launched...");
+    launch(app);
+}
+
 #[cfg(feature = "server")]
-pub fn load_env() {
+fn load_env() {
     let password_hash_was_set = std::env::var_os("APP_PASSWORD_HASH").is_some();
     let env_path = dotenvy::dotenv().ok();
 
@@ -34,20 +50,16 @@ fn raw_password_hash(env_contents: &str) -> Option<&str> {
 #[cfg(all(test, feature = "server"))]
 mod tests {
     use super::raw_password_hash;
-
     #[test]
     fn raw_hash_loader_preserves_argon2_dollar_signs() {
         let expected = "$argon2id$v=19$m=19456,t=2,p=1$c2FsdA$ZGlnZXN0";
         let contents = format!("SESSION_SECRET=example\nAPP_PASSWORD_HASH={expected}\n");
-
         assert_eq!(raw_password_hash(&contents), Some(expected));
     }
-
     #[test]
     fn raw_hash_loader_accepts_quoted_hashes() {
         let expected = "$argon2id$v=19$m=19456,t=2,p=1$c2FsdA$ZGlnZXN0";
         let contents = format!("APP_PASSWORD_HASH='{expected}'\n");
-
         assert_eq!(raw_password_hash(&contents), Some(expected));
     }
 }

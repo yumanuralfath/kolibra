@@ -3,17 +3,12 @@ use dioxus::prelude::*;
 #[component]
 pub fn navbar_comp() -> Element {
     let mut theme = use_context::<Signal<bool>>();
-
     rsx! {
-        header {
-            class: "flex items-center justify-between px-4 py-4",
-            h1 {
-                class: "text-xl font-semibold",
-                "KOLIBRA"
-            }
+        header { class: "flex items-center justify-between px-4 py-4",
+            h1 { class: "text-xl font-semibold", "KOLIBRA" }
             button {
                 r#type: "button",
-                class: "btn btn-ghost btn-square",
+                class: "btn btn-ghost btn-square hover:animate-jelly",
                 title: if theme() { "Switch to light theme" } else { "Switch to dark theme" },
                 aria_label: if theme() { "Switch to light theme" } else { "Switch to dark theme" },
                 onclick: move |_| {
@@ -21,7 +16,7 @@ pub fn navbar_comp() -> Element {
                     *theme.write() = !current_theme;
                 },
                 span {
-                    class: if theme() { "hover:animate-jelly icon-[lucide--sun] size-5" } else { "hover:animate-jelly icon-[lucide--moon] size-5" },
+                    class: if theme() { "icon-[lucide--sun] size-5" } else { "icon-[lucide--moon] size-5" },
                     aria_hidden: "true",
                 }
             }

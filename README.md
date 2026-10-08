@@ -1,39 +1,108 @@
-# Development
+# Kolibra
 
-Your new jumpstart project includes basic organization with an organized `assets` folder and a `components` folder.
-If you chose to develop with the router feature, you will also have a `views` folder.
+Kolibra uses Dioxus Fullstack. The server handles server functions and login sessions, while the web, desktop, and mobile apps act as clients that send requests to it.
 
-```
-project/
-├─ assets/ # Any assets that are used by the app should be placed here
-├─ src/
-│  ├─ main.rs # The entrypoint for the app. It also defines the routes for the app.
-│  ├─ components/
-│  │  ├─ mod.rs # Defines the components module
-│  │  ├─ hero.rs # The Hero component for use in the home page
-│  │  ├─ echo.rs # The echo component uses server functions to communicate with the server
-│  ├─ views/ # The views each route will render in the app.
-│  │  ├─ mod.rs # Defines the module for the views route and re-exports the components for each route
-│  │  ├─ blog.rs # The component that will render at the /blog/:id route
-│  │  ├─ home.rs # The component that will render at the / route
-├─ Cargo.toml # The Cargo.toml file defines the dependencies and feature flags for your project
-```
+## Local development
 
-### Styling and Development
-
-Tailwind CSS v4, DaisyUI, and `tw-animate-css` are managed with Bun. Install the dependencies once:
+Install the stylesheet dependencies before running the app:
 
 ```bash
 bun install
 ```
 
-Run the CSS watcher and Dioxus development server together in one terminal:
+Run the web app with a local Fullstack server and CSS watch:
 
 ```bash
-bun run dev
+./scripts/dev.sh
 ```
 
-The development command builds the stylesheet once, then watches `assets/tailwind.input.css` and Rust source files for Tailwind classes while `dx serve` runs. CSS changes update the asset without recompiling the Rust app. To run only the Tailwind watcher, use `bun run css:watch`; to build the stylesheet once, use `bun run css:build`.
+The script builds CSS, starts its watcher, and launches `dx serve` directly so Bun's `.env` interpolation does not alter the server's environment.
 
-The generated stylesheet is `assets/tailwind.css`, which is linked by the app. Add DaisyUI components with their standard classes, such as `btn btn-primary`.
+## Deploy the Fullstack server
 
+The server requires two environment variables:
+
+- `APP_PASSWORD_HASH`: the Argon2 hash for the login password, not the plaintext password.
+- `SESSION_SECRET`: a random secret used to sign session cookies.
+
+Generate these values locally with the provided helpers:
+
+```bash
+cargo run --bin hash_password
+cargo run --bin generate_secret
+```
+
+Set the hash and secret as environment variables on your deployment host (for example, Railway). Do not put the plaintext password or `SESSION_SECRET` in source code, client images, or the repository. For local development, you can store them in `.env`, which is already ignored by Git.
+
+The repository's `Dockerfile` builds a Fullstack web bundle and runs the server binary on `0.0.0.0:8080`. Use this Docker image to deploy the server:
+
+```bash
+docker build -t kolibra .
+docker run --rm -p 8080:8080 \
+  -e APP_PASSWORD_HASH='<hash-argon2>' \
+  -e SESSION_SECRET='<secret-acak>' \
+  kolibra
+```
+
+On Railway, deploy from this repository using the `Dockerfile`, then add both variables under **Variables**. The platform must pass `PORT` and `IP=0.0.0.0` to the server process; the Dockerfile sets defaults of `8080` and `0.0.0.0`. After deployment, test the status endpoint, for example:
+
+```bash
+curl -i https://your-domain.example/api/auth/status
+```
+
+The server at your web domain can also serve the web client. Build the Fullstack web bundle with:
+
+```bash
+dx bundle --web --release
+```
+
+## Connect clients to the server
+
+The server-function base URL is configured in `src/main.rs`, inside `main()`:
+
+```rust
+#[cfg(not(feature = "server"))]
+set_server_url("https://kolibra-production.up.railway.app");
+```
+
+Replace this URL with the origin of your deployed server. **Do not add a trailing slash (`/`)**: Dioxus appends the server-function path directly, such as `/api/auth/login`. For example, use `https://example.up.railway.app`, not `https://example.up.railway.app/`.
+
+This setting applies to web, desktop, and mobile clients. Set it once at startup, before calling the first server function; the URL cannot be changed after the app starts. The `cfg(not(feature = "server"))` attribute prevents the client URL from being set in the server binary.
+
+Whenever you change the server address, rebuild the client you plan to distribute. The endpoint must be reachable from users' devices over HTTPS. Do not include server credentials in client builds.
+
+## Build the desktop client
+
+Build a Linux AppImage:
+
+```bash
+dx bundle --desktop --package-types appimage --release
+```
+
+For other distribution formats, use the appropriate package type, such as `deb` or `rpm` on Linux, `msi` on Windows, or `dmg` on macOS. In general, build desktop apps on the target OS. Desktop users still need a running Fullstack server; its URL comes from `set_server_url` above.
+
+## Build the mobile client
+
+Android APK:
+
+```bash
+dx bundle --android --package-types apk --release
+```
+
+Android App Bundle for store distribution:
+
+```bash
+dx bundle --android --package-types aab --release
+```
+
+iOS archive:
+
+```bash
+dx bundle --ios --package-types ipa --release
+```
+
+Mobile builds require the relevant platform toolchain: Android requires the Android SDK/NDK, while iOS requires macOS and Xcode. Set the server URL before building. The mobile app uses the same Fullstack server and does not need a copy of the server secrets.
+
+## Styling
+
+Tailwind CSS v4 and DaisyUI are managed with Bun. The stylesheet source is `assets/tailwind.input.css`, and the app uses the generated `assets/tailwind.css`. Run `bun run css:build` after editing the stylesheet.
